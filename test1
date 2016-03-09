@@ -1,0 +1,54 @@
+# -*- coding: utf8 -*-
+import urllib
+import urllib2
+import cookielib
+import traceback
+import time
+import gzip
+import cStringIO
+import os
+import bz2
+import glob
+import re
+import time
+import datetime
+import base64
+import gzip
+import sys
+urllib.getproxies_registry = lambda : {}
+
+
+def cookies():
+    cj = cookielib.CookieJar()
+    opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))  
+    opener.addheaders = [('User-agent', 'iTunes/11.0 (Windows; Microsoft Windows 7 Business Edition Service Pack 1 (Build 7601)) AppleWebKit/536.27.1')]
+    urllib2.install_opener(opener)
+
+def download_ios(appid):
+    cookies()
+    count = 0
+    while 1:
+        url = 'https://itunes.apple.com/WebObjects/MZStore.woa/wa/userReviewsRow?cc=cn&id=%s&displayable-kind=11&startIndex=%s&endIndex=%s&sort=0&appVersion=all'%(appid,count*1000,(count+1)*1000)
+        try:
+            result = urllib2.urlopen(url,timeout = 10)
+        except:
+            traceback.print_exc()
+            time.sleep(10)
+        userReviewList = eval(result.read())['userReviewList']
+        num = len(userReviewList)
+        print appid,count,num
+        count += 1
+        if num == 0:
+            break
+        for d in userReviewList:
+            w.write('%s\t%s\t%s\t%s\t%s\n'%(d['date'],d['rating'],re.sub('\r|\t|\n',' ',d['name']),re.sub('\r|\t|\n',' ',d['title']),re.sub('\r|\t|\n',' ',d['body'])))
+
+
+
+
+
+w = open('result.txt','w')
+download_ios('XXXX')
+w.close()
+
+raw_input('end.....')
